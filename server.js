@@ -1,6 +1,3 @@
-// import breakchains middleware
-import breakAllChains from '.app/routes/task_routes'
-
 // require necessary NPM packages
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -76,8 +73,6 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(taskRoutes)
-// apply breakAllChains to all task-routes
-app.use('/tasks', breakAllChains)
 
 // run API on designated port (4741 in this case)
 app.listen(port, () => {

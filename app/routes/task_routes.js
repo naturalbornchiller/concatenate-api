@@ -38,6 +38,7 @@ const breakAllChains = (req, res, next) => {
     })
     .then(next)
 }
+router.use(breakAllChains)
 
 // INDEX
 // GET /tasks
@@ -148,5 +149,3 @@ router.delete('/tasks/:id', requireToken, (req, res) => {
 })
 
 module.exports = router
-
-export default breakAllChains
