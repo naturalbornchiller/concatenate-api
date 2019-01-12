@@ -1,9 +1,7 @@
 # concatenate-api
-The server side of an app designed to display progress.
-Here is the [client side](http://github.com/naturalbornchiller/concatenate-client "concatenate-client") repo.
-
-Links to the deployed [back]() and [front]()end, respectively.
-
+The server side of an app designed to display progress. [Here](http://github.com/naturalbornchiller/concatenate-client "concatenate-client") is the client side repo.
+Links to the [deployed back]() and [frontend](), respectively.
+___
 Concatenate is a simple but effective way for users to
 track the repetition of tasks and form habits.
 
