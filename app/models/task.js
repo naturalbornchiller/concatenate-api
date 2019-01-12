@@ -15,7 +15,7 @@ const taskSchema = new Schema({
       type: Date,
       default: () => null
     },
-    latestConcat: {
+    lastConcat: {
       type: Date,
       required: true
     }
@@ -61,7 +61,7 @@ taskSchema.virtual('breakChain').set(function () {
   // if chain is NOT broken - and the difference
   // between now and the latestConcat > than 1 day
   if (!latestChain.dayBroken &&
-     (new Date() - latestChain.latestConcat) > 24) {
+     (new Date() - latestChain.lastConcat) > 24) {
 
     // chain is broken on todays date
     latestChain.dayBroken = new Date()
@@ -70,7 +70,7 @@ taskSchema.virtual('breakChain').set(function () {
     this.chains.push({
       dayStarted: new Date(),
       dayBroken: null,
-      latestConcat: this.dayStarted
+      lastConcat: this.dayStarted
     })
   }
 })
