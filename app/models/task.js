@@ -60,7 +60,7 @@ taskSchema.virtual('breakChain').set(function () {
 
   // if chain is NOT broken - and the difference
   // between now and the latestConcat > than 1 day
-  // one day is 1000ms * 60 * 60 * 24
+  // note: one day is 1000ms * 60 * 60 * 24
   if (!latestChain.dayBroken &&
      (new Date() - latestChain.lastConcat) > 86400000) {
 

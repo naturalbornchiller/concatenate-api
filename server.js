@@ -1,3 +1,6 @@
+// import breakchains middleware
+import breakAllChains from '.app/routes/task_routes'
+
 // require necessary NPM packages
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -7,6 +10,7 @@ const cors = require('cors')
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
 const userRoutes = require('./app/routes/user_routes')
+const taskRoutes = require('./app/routes/task_routes')
 
 // require database configuration logic
 // `db` will be the actual Mongo URI as a string
@@ -37,6 +41,9 @@ mongoose.connect(db, {
 
 // instantiate express application object
 const app = express()
+
+// apply breakAllChains to all task-routes
+app.use('/tasks', breakAllChains)
 
 // set CORS headers on response from this API using the `cors` NPM package
 // `CLIENT_ORIGIN` is an environment variable that will be set on Heroku
@@ -71,6 +78,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // register route files
 app.use(exampleRoutes)
 app.use(userRoutes)
+app.use(taskRoutes)
 
 // run API on designated port (4741 in this case)
 app.listen(port, () => {

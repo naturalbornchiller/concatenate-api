@@ -28,11 +28,9 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-
 // make this into a middleware such that it can be run after requireToken in
 // each route on every request
-https://stormpath.com/blog/how-to-write-middleware-for-express-apps
-https://expressjs.com/en/guide/using-middleware.html
+// https://expressjs.com/en/guide/using-middleware.html
 const breakAllChains = (req, res, next) => {
   Task.find({ owner: req.user.id })
     .then(tasks => {
@@ -41,16 +39,9 @@ const breakAllChains = (req, res, next) => {
     .then(next)
 }
 
-const thisThing = () => {
-  Task.find({ owner: })
-    .then(tasks => {
-       tasks.forEach(task => task.breakChain())
-    })
-}
-
 // INDEX
 // GET /tasks
-router.get('/tasks', requireToken, breakAllChains, (req, res) => {
+router.get('/tasks', requireToken, (req, res) => {
   Task.find()
     .then(tasks => {
       // `tasks` will be an array of Mongoose documents
@@ -66,7 +57,7 @@ router.get('/tasks', requireToken, breakAllChains, (req, res) => {
 
 // SHOW
 // GET /tasks/5a7db6c74d55bc51bdf39793
-router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.get('/tasks/:id', requireToken, (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
@@ -78,7 +69,7 @@ router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
 
 // CREATE
 // POST /tasks
-router.post('/tasks', requireToken, breakAllChains, (req, res) => {
+router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
 
@@ -99,7 +90,7 @@ router.post('/tasks', requireToken, breakAllChains, (req, res) => {
 //     id: <task id>
 //   }
 // }
-router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.patch('/tasks/:id', requireToken, (req, res) => {
   // if the client attempts to change the `owner` property by including a new
   // owner, prevent that by deleting that key/value pair
   delete req.body.task.owner
@@ -127,7 +118,7 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
       // make a copy of task and mutate the chain at latestChainIndex to have
       // the date and time right now
       const now = new Date()
-      const updatedTask = { ...task }
+      const updatedTask = { ...task } // copies task
       updatedTask.chains[latestChainIndex].lastConcat = now
 
       // pass the result of Mongoose's `.update` to the next `.then`
@@ -141,7 +132,7 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
 
 // DESTROY
 // DELETE /task/5a7db6c74d55bc51bdf39793
-router.delete('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.delete('/tasks/:id', requireToken, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -157,3 +148,5 @@ router.delete('/tasks/:id', requireToken, breakAllChains, (req, res) => {
 })
 
 module.exports = router
+
+export default breakAllChains
