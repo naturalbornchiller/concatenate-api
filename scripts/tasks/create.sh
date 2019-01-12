@@ -2,8 +2,11 @@
 
 API="http://localhost:4741"
 URL_PATH="/tasks"
+TOKEN=2d2ba9025bdfe075ceab6816f6dee498
+NAME="Meditate"
+# DAY_STARTED='1901-01-23'
 
-curl "${API}${URL_PATH}" \
+curl "${API}${URL_PATH}/" \
   --include \
   --request POST \
   --header "Content-Type: application/json" \
@@ -11,11 +14,7 @@ curl "${API}${URL_PATH}" \
   --data '{
     "task": {
       "name": "'"${NAME}"'",
-      "chains": [{
-        "'"${DAY_STARTED}"'",
-        "'"${DAY_BROKEN}"'",
-        "'"${LAST_CONCAT}"'"
-      }]
+      "chains": [{}]
     }
   }'
 

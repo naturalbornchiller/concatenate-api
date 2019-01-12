@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose'
+const mongoose = require('mongoose')
 
-const taskSchema = new Schema({
+const taskSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -8,8 +8,7 @@ const taskSchema = new Schema({
   chains: [{
     dayStarted: {
       type: Date,
-      default: new Date(),
-      required: true
+      default: new Date()
     },
     dayBroken: {
       type: Date,
@@ -17,11 +16,11 @@ const taskSchema = new Schema({
     },
     lastConcat: {
       type: Date,
-      required: true
+      default: this.dayStarted
     }
   }],
   owner: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   }
@@ -90,6 +89,6 @@ chains: [
 ]
 */
 
-const Task = model('Task', taskSchema)
+const Task = mongoose.model('Task', taskSchema)
 
-export default Task
+module.exports = Task

@@ -1,5 +1,5 @@
-// pull in Mongoose model for tasks
-import Task from '../models/task'
+// pull in Mongoose model for taskss
+const Task = require('../models/task')
 
 // Express docs: http://expressjs.com/en/api.html
 const express = require('express')
@@ -31,14 +31,14 @@ const router = express.Router()
 // make this into a middleware such that it can be run after requireToken in
 // each route on every request
 // https://expressjs.com/en/guide/using-middleware.html
-const breakAllChains = (req, res, next) => {
-  Task.find({ owner: req.user.id })
-    .then(tasks => {
-      tasks.forEach(task => task.breakChain())
-    })
-    .then(next)
-}
-router.use(breakAllChains)
+// const breakAllChains = (req, res, next) => {
+//   Task.find({ owner: req.user.id })
+//     .then(tasks => {
+//       tasks.forEach(task => task.breakChain())
+//     })
+//     .then(next)
+// }
+// router.use(breakAllChains)
 
 // INDEX
 // GET /tasks
