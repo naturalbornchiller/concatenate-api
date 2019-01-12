@@ -5,48 +5,76 @@ const taskSchema = new Schema({
     type: String,
     required: true
   },
-  chains: {
-    type: Array,
-    default: [],
-    require: true
-  },
+  chains: [{
+    dayStarted: {
+      type: Date,
+      default: new Date(),
+      required: true
+    },
+    dayBroken: {
+      type: Date,
+      default: () => null
+    },
+    latestConcat: {
+      type: Date,
+      required: true
+    }
+  }],
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   }
+},
+{
+  toObject: { virtuals: true }
 })
 
-taskSchema.set('toObject', {virtuals: true})
-
 taskSchema.virtual('chainLength').get(function () {
-  return this.chains[this.chains.length - 1]
+  // stores most recent chain
+  const latestChain = this.chains[this.chains.length - 1]
+
+  // if dayBroken is TRUE return dayBroken minus dayStarted,
+  // else return Today's date minus dayStarted
+  return (latestChain.dayBroken || Date.now) - latestChain.dayStarted
 })
 
 taskSchema.virtual('longestChain').get(function () {
-  return Math.max.apply(this.chains, this.map(chain => chain.length))
+  // returns longest chain for this task
+  return Math.max.apply(this.chains, this.map(chain => chain.chainLength))
 })
 
 taskSchema.virtual('totalDays').get(function () {
-  return this.chains[this.chains.length - 1].length
+  // returns all days inwhich task was completed
+  return this.chains.reduce((totalDays, currChain) => totalDays + currChain.chainLength, 0)
 })
 
-// lat = north south
-// long = east west
-placeSchema.virtual('isWesternHemisphere?').get(function () {
-  if (this.longitude.includes('W')) {
-    return true
-  } else {
-    return false
+taskSchema.virtual('taskStarted').get(function () {
+  // returns date that task was first started
+  return this.chains[0].dayStarted
+})
+
+taskSchema.virtual('breakChain').set(function () {
+  // stores the most recent chain
+  const latestChain = this.chains[this.chains.length - 1]
+
+  // if chain is NOT broken - and the difference
+  // between now and the latestConcat > than 1 day
+  if (!latestChain.dayBroken &&
+     (new Date() - latestChain.latestConcat) > 24) {
+
+    // chain is broken on todays date
+    latestChain.dayBroken = new Date()
+
+    // and a new chain is started
+    this.chains.push({
+      dayStarted: new Date(),
+      dayBroken: null,
+      latestConcat: this.dayStarted
+    })
   }
 })
 
-const Place = model('Place', placeSchema)
-
-
-// time stamp not needed - just need to look at day_started of first chain
-
-// chains concept:
 /*
 chains: [
   {
@@ -61,3 +89,7 @@ chains: [
   }
 ]
 */
+
+const Task = model('Task', taskSchema)
+
+export default Task
