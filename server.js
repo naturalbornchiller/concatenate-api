@@ -42,9 +42,6 @@ mongoose.connect(db, {
 // instantiate express application object
 const app = express()
 
-// apply breakAllChains to all task-routes
-app.use('/tasks', breakAllChains)
-
 // set CORS headers on response from this API using the `cors` NPM package
 // `CLIENT_ORIGIN` is an environment variable that will be set on Heroku
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:7165' }))
@@ -79,6 +76,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(taskRoutes)
+// apply breakAllChains to all task-routes
+app.use('/tasks', breakAllChains)
 
 // run API on designated port (4741 in this case)
 app.listen(port, () => {
