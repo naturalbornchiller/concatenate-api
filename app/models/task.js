@@ -1,24 +1,26 @@
 const mongoose = require('mongoose')
 
+const chainSchema = new mongoose.Schema({
+  dayStarted: {
+    type: Date,
+    default: new Date()
+  },
+  dayBroken: {
+    type: Date,
+    default: () => null
+  },
+  lastConcat: {
+    type: Date,
+    default: () => null
+  }
+})
+
 const taskSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
   },
-  chains: [{
-    dayStarted: {
-      type: Date,
-      default: new Date()
-    },
-    dayBroken: {
-      type: Date,
-      default: () => null
-    },
-    lastConcat: {
-      type: Date,
-      default: this.dayStarted
-    }
-  }],
+  chains: [chainSchema],
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -29,24 +31,25 @@ const taskSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 })
 
-taskSchema.virtual('chainLength').get(function () {
-  // stores most recent chain
-  const latestChain = this.chains[this.chains.length - 1]
+// taskSchema.virtual('chainLength').get(function () {
+//   // stores most recent chain
+//   const latestChain = this.chains[this.chains.length - 1]
 
-  // if dayBroken is TRUE return dayBroken minus dayStarted,
-  // else return Today's date minus dayStarted
-  return (latestChain.dayBroken || Date.now) - latestChain.dayStarted
-})
+//   // if dayBroken is TRUE return dayBroken minus dayStarted,
+//   // else return Today's date minus dayStarted
+//   // note: 86400000 = one day in milliseconds
+//   return ((latestChain.dayBroken || new Date()) - latestChain.dayStarted) / 86400000
+// })
 
-taskSchema.virtual('longestChain').get(function () {
-  // returns longest chain for this task
-  return Math.max.apply(this.chains, this.map(chain => chain.chainLength))
-})
+// taskSchema.virtual('longestChain').get(function () {
+//   // returns longest chain for this task
+//   return Math.max.apply(null, this.tasks.map(chain => chain.chainLength))
+// })
 
-taskSchema.virtual('totalDays').get(function () {
-  // returns all days inwhich task was completed
-  return this.chains.reduce((totalDays, currChain) => totalDays + currChain.chainLength, 0)
-})
+// taskSchema.virtual('totalDays').get(function () {
+//   // returns all days inwhich task was completed
+//   return this.chains.reduce((totalDays, currChain) => totalDays + currChain.chainLength, 0)
+// })
 
 taskSchema.virtual('taskStarted').get(function () {
   // returns date that task was first started
