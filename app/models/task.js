@@ -15,6 +15,33 @@ const chainSchema = new mongoose.Schema({
   }
 })
 
+chainSchema.virtual('breakChain').set(function () {
+  // if chain is NOT broken - and the difference
+  // between now and the latestConcat > than 1 day
+  // note: one day is 1000ms * 60 * 60 * 24
+  if (!this.dayBroken &&
+     (new Date() - this.lastConcat) > 86400000) {
+    // chain is broken on todays date
+    this.dayBroken = new Date()
+    return true
+  } else {
+    return false
+  }
+})
+
+chainSchema.virtual('updateConcat').set(function () {
+  // if chain is NOT broken - and the difference
+  // between now and the latestConcat > than 1 day
+  // note: one day is 1000ms * 60 * 60 * 24
+  if (!this.dayBroken) {
+    // chain is broken on todays date
+    this.lastConcat = new Date()
+    return true
+  } else {
+    return false
+  }
+})
+
 const taskSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -31,19 +58,16 @@ const taskSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 })
 
-// taskSchema.virtual('chainLength').get(function () {
-//   // stores most recent chain
-//   const latestChain = this.chains[this.chains.length - 1]
-
+// chainSchema.virtual('chainLength').get(function () {
 //   // if dayBroken is TRUE return dayBroken minus dayStarted,
 //   // else return Today's date minus dayStarted
 //   // note: 86400000 = one day in milliseconds
-//   return ((latestChain.dayBroken || new Date()) - latestChain.dayStarted) / 86400000
+//   return ((this.dayBroken || new Date()) - this.dayStarted) / 86400000
 // })
 
 // taskSchema.virtual('longestChain').get(function () {
 //   // returns longest chain for this task
-//   return Math.max.apply(null, this.tasks.map(chain => chain.chainLength))
+//   return Math.max.apply(null, this.chains.map(chain => chain.chainLength))
 // })
 
 // taskSchema.virtual('totalDays').get(function () {
@@ -51,31 +75,10 @@ const taskSchema = new mongoose.Schema({
 //   return this.chains.reduce((totalDays, currChain) => totalDays + currChain.chainLength, 0)
 // })
 
-taskSchema.virtual('taskStarted').get(function () {
-  // returns date that task was first started
-  return this.chains[0].dayStarted
-})
-
-taskSchema.virtual('breakChain').set(function () {
-  // stores the most recent chain
-  const latestChain = this.chains[this.chains.length - 1]
-
-  // if chain is NOT broken - and the difference
-  // between now and the latestConcat > than 1 day
-  // note: one day is 1000ms * 60 * 60 * 24
-  if (!latestChain.dayBroken &&
-     (new Date() - latestChain.lastConcat) > 86400000) {
-
-    // chain is broken on todays date
-    latestChain.dayBroken = new Date()
-
-    // and a new chain is started
-    this.chains.push({
-      dayStarted: new Date(),
-      lastConcat: this.dayStarted
-    })
-  }
-})
+// taskSchema.virtual('taskStarted').get(function () {
+//   // returns date that task was first started
+//   return this.chains[0].dayStarted
+// })
 
 /*
 chains: [

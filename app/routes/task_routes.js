@@ -34,7 +34,7 @@ const router = express.Router()
 // const breakAllChains = (req, res, next) => {
 //   Task.find({ owner: req.user.id })
 //     .then(tasks => {
-//       tasks.forEach(task => task.breakChain())
+//       tasks.forEach(task => task[task.length - 1].breakChain())
 //     })
 //     .then(next)
 // }
@@ -62,7 +62,7 @@ router.get('/tasks/:id', requireToken, (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
-    // if `findById` is succesful, respond with 200 and "example" JSON
+    // if `findById` is successful, respond with 200 and "example" JSON
     .then(task => res.status(200).json({ task: task.toObject() }))
     // if an error occurs, pass it to the handler
     .catch(err => handle(err, res))
@@ -73,6 +73,7 @@ router.get('/tasks/:id', requireToken, (req, res) => {
 router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
+  req.body.task.chains = [{}]
 
   Task.create(req.body.task)
     // respond to succesful `create` with status 201 and JSON of new "example"
@@ -103,27 +104,16 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // it will throw an error if the current user isn't the owner
       requireOwnership(req, task)
 
-      // the client will often send empty strings for parameters that it does
-      // not want to update. We delete any key/value pair where the value is
-      // an empty string before updating
-      Object.keys(req.body.task).forEach(key => {
-        if (req.body.task[key] === '') {
-          delete req.body.task[key]
-        }
-      })
-
       // for this task, find either only chain where dayBroken is null, or sort
       // chain and find last, which also should have unset dayBroken
-      const latestChainIndex = this.chains.length - 1
+      const latestChainIndex = task.chains.length - 1
 
-      // make a copy of task and mutate the chain at latestChainIndex to have
+      // changes chain at latestChainIndex to have
       // the date and time right now
-      const now = new Date()
-      const updatedTask = { ...task } // copies task
-      updatedTask.chains[latestChainIndex].lastConcat = now
+      task.chains[latestChainIndex].updateConcat()
 
       // pass the result of Mongoose's `.update` to the next `.then`
-      return task.update(updatedTask)
+      return task.update(task)
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))

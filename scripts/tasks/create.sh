@@ -2,7 +2,7 @@
 
 API="http://localhost:4741"
 URL_PATH="/tasks"
-TOKEN=2d2ba9025bdfe075ceab6816f6dee498
+TOKEN=ad410895f4171779f1b30bd4991b66a6
 NAME="Walk a little"
 DAY_STARTED='2005-01-02'
 
@@ -12,10 +12,7 @@ curl "${API}${URL_PATH}/" \
   --header "Authorization: Bearer ${TOKEN}" \
   --data '{
     "task": {
-      "name": "'"${NAME}"'",
-      "chains": [{
-        "dayStarted": "'"${DAY_STARTED}"'"
-      }]
+      "name": "'"${NAME}"'"
     }
   }' \
   | json_pp
