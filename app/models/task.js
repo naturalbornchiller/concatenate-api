@@ -1,7 +1,5 @@
 const mongoose = require('mongoose')
 
-const Chain = require('./chain')
-
 const taskSchema = new mongoose.Schema(
   {
     name: {

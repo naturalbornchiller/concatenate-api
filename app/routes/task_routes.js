@@ -77,37 +77,49 @@ router.get('/tasks/:id', requireToken, (req, res) => {
 router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
-  // req.body.task.chains = [{}]
 
+  // we need to create a Task object ahead of saving it because
+  // we will need to access the _id from this object in the Promise chain
+  // and this is one way to get that data into the outer scope
   const task = new Task({
     _id: new mongoose.Types.ObjectId(),
-    name: 'Ian Fleming',
+    name: req.body.task.name,
     owner: req.user.id
   })
 
-  task.save(function (err) {
-    if (err) return handleError(err)
+  // save our task object
+  task.save()
 
-    const chain = new Chain({
-      owner: task._id // assign the _id from the person
+    // construct and save a chain object with it's owner set to the task's _id
+    .then(() => {
+      const chain = new Chain({
+        _id: new mongoose.Types.ObjectId(),
+        owner: task._id
+      })
+      return chain.save()
     })
 
-    chain.save(function (err) {
-
-      Task.findById(task._id)
-        .populate('chains')
-        .exec(function (err, task) {
-          if (err) return handleError(err)
-          console.log(task)
-          // prints "The author is Ian Fleming"
+    // find the Task that was created, modify it by adding the chain ID from
+    // the above created chain and save it
+    .then(chain => {
+      return new Promise((resolve, reject) => {
+        Task.findOne({ _id: task._id }, (err, task) => {
+          if (err) reject(err)
+          task.chains = [ chain._id ]
+          task.save(() => resolve(task))
         })
-
-      if (err) return handleError(err)
-      res.status(201).json({ task: task.toObject() })
-
-      // thats it!
+      })
     })
-  })
+
+    // send back the task info
+    .then(task => {
+      res.status(201).json({ task })
+    })
+    .catch(err => {
+      console.log('error')
+      handle(err, res)
+    })
+})
 
   // const task = new Task({
   //   _id: new mongoose.Types.ObjectId(),
