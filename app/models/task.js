@@ -1,62 +1,24 @@
 const mongoose = require('mongoose')
 
-const chainSchema = new mongoose.Schema({
-  dayStarted: {
-    type: Date,
-    default: new Date()
-  },
-  dayBroken: {
-    type: Date,
-    default: () => null
-  },
-  lastConcat: {
-    type: Date,
-    default: () => null
-  }
-})
+const Chain = require('./chain')
 
-chainSchema.virtual('breakChain').set(function () {
-  // if chain is NOT broken - and the difference
-  // between now and the latestConcat > than 1 day
-  // note: one day is 1000ms * 60 * 60 * 24
-  if (!this.dayBroken &&
-     (new Date() - this.lastConcat) > 86400000) {
-    // chain is broken on todays date
-    this.dayBroken = new Date()
-    return true
-  } else {
-    return false
-  }
-})
-
-chainSchema.virtual('updateConcat').set(function () {
-  // if chain is NOT broken - and the difference
-  // between now and the latestConcat > than 1 day
-  // note: one day is 1000ms * 60 * 60 * 24
-  if (!this.dayBroken) {
-    // chain is broken on todays date
-    this.lastConcat = new Date()
-    return true
-  } else {
-    return false
-  }
-})
-
-const taskSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const taskSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    chains: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chain' }],
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
   },
-  chains: [chainSchema],
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  {
+    toObject: { virtuals: true }
   }
-},
-{
-  toObject: { virtuals: true }
-})
+)
 
 // chainSchema.virtual('chainLength').get(function () {
 //   // if dayBroken is TRUE return dayBroken minus dayStarted,
@@ -96,5 +58,4 @@ chains: [
 */
 
 const Task = mongoose.model('Task', taskSchema)
-
 module.exports = Task

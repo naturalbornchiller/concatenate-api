@@ -1,5 +1,9 @@
 // pull in Mongoose model for taskss
+const mongoose = require('mongoose')
+
 const Task = require('../models/task')
+const Chain = require('../models/chain')
+// const Chain = require('../models/task')
 
 // Express docs: http://expressjs.com/en/api.html
 const express = require('express')
@@ -73,15 +77,76 @@ router.get('/tasks/:id', requireToken, (req, res) => {
 router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
-  req.body.task.chains = [{}]
+  // req.body.task.chains = [{}]
 
-  Task.create(req.body.task)
-    // respond to succesful `create` with status 201 and JSON of new "example"
-    .then(task => res.status(201).json({ task: task.toObject() }))
+  const task = new Task({
+    _id: new mongoose.Types.ObjectId(),
+    name: 'Ian Fleming',
+    owner: req.user.id
+  })
+
+  task.save(function (err) {
+    if (err) return handleError(err)
+
+    const chain = new Chain({
+      owner: task._id // assign the _id from the person
+    })
+
+    chain.save(function (err) {
+
+      Task.findById(task._id)
+        .populate('chains')
+        .exec(function (err, task) {
+          if (err) return handleError(err)
+          console.log(task)
+          // prints "The author is Ian Fleming"
+        })
+
+      if (err) return handleError(err)
+      res.status(201).json({ task: task.toObject() })
+
+      // thats it!
+    })
+  })
+
+  // const task = new Task({
+  //   _id: new mongoose.Types.ObjectId(),
+  //   name: req.body.task.name,
+  //   owner: req.user.id
+  // })
+
+  // const chain = new Chain({
+  //   owner: task._id
+  // })
+
+  // chain.save()
+  //   .then(task.save)
+  //   .then(console.log)
+  //   .then(task => task.populate('chains'))
+  //   .then(task => {
+  //     console.log(task)
+  //     res.status(201).json({ task: task.toObject() })
+  //   })
+
+          // .populate('chains')
+          // .exec((err, data) => {
+          //   console.log('populated', data)
+          //   res.status(201).json({ chain: chain.toObject() })
+
+          // })
+      // Story.
+      //   findOne({ title: 'Casino Royale' }).
+      //   populate('author').
+      //   exec(function (err, story) {
+      //     if (err) return handleError(err);
+      //     console.log('The author is %s', story.author.name);
+      //     // prints "The author is Ian Fleming"
+      //   });
+    
     // if an error occurs, pass it off to our error handler
     // the error handler needs the error message and the `res` object so that it
     // can send an error message back to the client
-    .catch(err => handle(err, res))
+    // .catch(err => handle(err, res))
 })
 
 // UPDATE
@@ -93,10 +158,9 @@ router.post('/tasks', requireToken, (req, res) => {
 //   }
 // }
 router.patch('/tasks/:id', requireToken, (req, res) => {
-  // if the client attempts to change the `owner` property by including a new
-  // owner, prevent that by deleting that key/value pair
-  delete req.body.task.owner
 
+  Chain.find({})
+    .then(console.log)
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -108,17 +172,34 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // chain and find last, which also should have unset dayBroken
       const latestChainIndex = task.chains.length - 1
 
-      // changes chain at latestChainIndex to have
-      // the date and time right now
-      task.chains[latestChainIndex].updateConcat()
 
-      // pass the result of Mongoose's `.update` to the next `.then`
-      return task.update(task)
+      const chainId = task.chains[latestChainIndex].id
+
+      // console.log(chainId)
+
+      // Chain.findById(chainId).then((chain) => console.log('chain is ',chain)).catch(console.error)
+      // console.log(chain.updateConcat)
+
+      return chainId
+
+      // // changes chain at latestChainIndex to have
+      // // the date and time right now
+      // task.chains[latestChainIndex].updateConcat()
+
+      // // pass the result of Mongoose's `.update` to the next `.then`
+      // return task.update(task)
+    })
+    .then(Chain.findById)
+    .then(chain => {
+      chain.updateConcat()
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
-    .catch(err => handle(err, res))
+    .catch(err => {
+      console.log('error')
+      handle(err, res)
+    })
 })
 
 // DESTROY
