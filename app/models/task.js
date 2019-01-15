@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { chainSchema } = require('./chain')
 
 const taskSchema = new mongoose.Schema(
   {
@@ -6,7 +7,7 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    chains: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chain' }],
+    chains: [chainSchema],
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

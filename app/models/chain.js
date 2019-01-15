@@ -52,4 +52,4 @@ const chainSchema = new mongoose.Schema(
 // });
 
 const Chain = mongoose.model('Chain', chainSchema)
-module.exports = Chain
+module.exports = { Chain, chainSchema }

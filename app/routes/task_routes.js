@@ -49,8 +49,9 @@ const router = express.Router()
 router.get('/tasks', requireToken, (req, res) => {
   Task.find()
     .then(tasks => {
+      // filter only tasks owned by the user
       const myTasks = tasks.filter(task => req.user._id.equals(task.owner))
-      // console.log('\n', myTasks)
+
       // `tasks` will be an array of Mongoose documents
       // we want to convert each one to a POJO, so we use `.map` to
       // apply `.toObject` to each one
@@ -86,87 +87,24 @@ router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
 
-  // we need to create a Task object ahead of saving it because
-  // we will need to access the _id from this object in the Promise chain
-  // and this is one way to get that data into the outer scope
-  const task = new Task({
-    _id: new mongoose.Types.ObjectId(),
-    name: req.body.task.name,
-    owner: req.user.id
-  })
-
-  // save our task object
-  task.save()
-
-    // construct and save a chain object with it's owner set to the task's _id
-    .then(() => {
-      const chain = new Chain({
-        _id: new mongoose.Types.ObjectId(),
-        owner: task._id
-      })
-      return chain.save()
-    })
-
-    // find the Task that was created, modify it by adding the chain ID from
-    // the above created chain and save it
-    .then(chain => {
-      return new Promise((resolve, reject) => {
-        Task.findOne({ _id: task._id }, (err, task) => {
-          if (err) reject(err)
-          task.chains = [ chain._id ]
-          task.save(() => resolve(task))
-        })
-      })
-    })
-
-    // send back the task info
+  // create a new task
+  Task.create(req.body.task)
     .then(task => {
-      res.status(201).json({ task })
+      // make a new chain
+      const chain = new Chain()
+
+      // update the task with the new chain (IMPORTANT: you need to pass the {new: true})
+      // option for ths Promise to return the updated version of the task to the next
+      // step of the promise chain
+      return Task.findByIdAndUpdate(task._id, { $push: { chains: chain } }, { new: true })
     })
-    .catch(err => {
-      console.log('error')
-      handle(err, res)
-    })
+
+    // return the updated task data
+    .then(task => res.status(201).json({ task: task }))
+
+    // if an error occurs, pass it to the handler
+    .catch(err => handle(err, res))
 })
-
-// const task = new Task({
-//   _id: new mongoose.Types.ObjectId(),
-//   name: req.body.task.name,
-//   owner: req.user.id
-// })
-
-// const chain = new Chain({
-//   owner: task._id
-// })
-
-// chain.save()
-//   .then(task.save)
-//   .then(console.log)
-//   .then(task => task.populate('chains'))
-//   .then(task => {
-//     console.log(task)
-//     res.status(201).json({ task: task.toObject() })
-//   })
-
-// .populate('chains')
-// .exec((err, data) => {
-//   console.log('populated', data)
-//   res.status(201).json({ chain: chain.toObject() })
-
-// })
-// Story.
-//   findOne({ title: 'Casino Royale' }).
-//   populate('author').
-//   exec(function (err, story) {
-//     if (err) return handleError(err);
-//     console.log('The author is %s', story.author.name);
-//     // prints "The author is Ian Fleming"
-//   });
-
-// if an error occurs, pass it off to our error handler
-// the error handler needs the error message and the `res` object so that it
-// can send an error message back to the client
-// .catch(err => handle(err, res))
 
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
