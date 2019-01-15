@@ -1,9 +1,9 @@
 // pull in Mongoose model for taskss
 const mongoose = require('mongoose')
 
-const Task = require('../models/task')
-const Chain = require('../models/chain')
-// const Chain = require('../models/task')
+const { Task } = require('../models/task')
+const { Chain } = require('../models/chain')
+const User = require('../models/user')
 
 // Express docs: http://expressjs.com/en/api.html
 const express = require('express')
@@ -83,26 +83,36 @@ router.get('/tasks/:id', requireToken, (req, res) => {
 
 // CREATE
 // POST /tasks
+// router.post('/tasks', requireToken, (req, res) => {
+//   // set owner of new task to be current user
+//   req.body.task.owner = req.user.id
+
+//   // create a new task
+//   Task.create(req.body.task)
+//     .then(task => {
+//       // make a new chain
+//       const chain = new Chain() // ERROR IS HERE!!!!
+
+//       // update the task with the new chain (IMPORTANT: you need to pass the {new: true})
+//       // option for ths Promise to return the updated version of the task to the next
+//       // step of the promise chain
+//       return Task.findByIdAndUpdate(task._id, { $push: { chains: chain } }, { new: true })
+//     })
+
+//     // return the updated task data
+//     .then(task => res.status(201).json({ task: task }))
+
+//     // if an error occurs, pass it to the handler
+//     .catch(err => handle(err, res))
+// })
+
+// CREATE
+// POST /tasks
 router.post('/tasks', requireToken, (req, res) => {
-  // set owner of new task to be current user
-  req.body.task.owner = req.user.id
-
-  // create a new task
   Task.create(req.body.task)
-    .then(task => {
-      // make a new chain
-      const chain = new Chain() // ERROR IS HERE!!!!
-
-      // update the task with the new chain (IMPORTANT: you need to pass the {new: true})
-      // option for ths Promise to return the updated version of the task to the next
-      // step of the promise chain
-      return Task.findByIdAndUpdate(task._id, { $push: { chains: chain } }, { new: true })
-    })
-
-    // return the updated task data
-    .then(task => res.status(201).json({ task: task }))
-
-    // if an error occurs, pass it to the handler
+    .then(task => Task.findByIdAndUpdate(task._id, { $push: { chains: new Chain() } }, { new: true }))
+    .then(task => User.findByIdAndUpdate(req.user.id, { $push: { tasks: task } }, { new: true }))
+    .then(user => res.status(201).json({ tasks: user.toObject().tasks }))
     .catch(err => handle(err, res))
 })
 

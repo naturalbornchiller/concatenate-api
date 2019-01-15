@@ -7,15 +7,7 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    chains: [chainSchema],
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    }
-  },
-  {
-    toObject: { virtuals: true }
+    chains: [chainSchema]
   }
 )
 
@@ -57,4 +49,4 @@ chains: [
 */
 
 const Task = mongoose.model('Task', taskSchema)
-module.exports = Task
+module.exports = { taskSchema, Task }

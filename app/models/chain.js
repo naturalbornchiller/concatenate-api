@@ -13,15 +13,7 @@ const chainSchema = new mongoose.Schema(
     lastConcat: {
       type: Date,
       default: () => null
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Task',
-      required: true
     }
-  },
-  {
-    toObject: { virtuals: true }
   }
 )
 
