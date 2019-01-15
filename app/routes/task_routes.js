@@ -45,14 +45,16 @@ const router = express.Router()
 // router.use(breakAllChains)
 
 // INDEX
-// GET /tasks
+// GET /tasks - now returns only users tasks
 router.get('/tasks', requireToken, (req, res) => {
   Task.find()
     .then(tasks => {
+      const myTasks = tasks.filter(task => req.user._id.equals(task.owner))
+      // console.log('\n', myTasks)
       // `tasks` will be an array of Mongoose documents
       // we want to convert each one to a POJO, so we use `.map` to
       // apply `.toObject` to each one
-      return tasks.map(task => task.toObject())
+      return myTasks.map(task => task.toObject())
     })
     // respond with status 200 and JSON of the examples
     .then(tasks => res.status(200).json({ tasks }))
@@ -67,7 +69,13 @@ router.get('/tasks/:id', requireToken, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     // if `findById` is successful, respond with 200 and "example" JSON
-    .then(task => res.status(200).json({ task: task.toObject() }))
+    .then(task => {
+      if (req.user._id.equals(task.owner)) {
+        return res.status(200).json({ task: task.toObject() })
+      } else {
+        return new Error('Task not owned by requesting user.')
+      }
+    })
     // if an error occurs, pass it to the handler
     .catch(err => handle(err, res))
 })
@@ -121,45 +129,44 @@ router.post('/tasks', requireToken, (req, res) => {
     })
 })
 
-  // const task = new Task({
-  //   _id: new mongoose.Types.ObjectId(),
-  //   name: req.body.task.name,
-  //   owner: req.user.id
-  // })
+// const task = new Task({
+//   _id: new mongoose.Types.ObjectId(),
+//   name: req.body.task.name,
+//   owner: req.user.id
+// })
 
-  // const chain = new Chain({
-  //   owner: task._id
-  // })
+// const chain = new Chain({
+//   owner: task._id
+// })
 
-  // chain.save()
-  //   .then(task.save)
-  //   .then(console.log)
-  //   .then(task => task.populate('chains'))
-  //   .then(task => {
-  //     console.log(task)
-  //     res.status(201).json({ task: task.toObject() })
-  //   })
+// chain.save()
+//   .then(task.save)
+//   .then(console.log)
+//   .then(task => task.populate('chains'))
+//   .then(task => {
+//     console.log(task)
+//     res.status(201).json({ task: task.toObject() })
+//   })
 
-          // .populate('chains')
-          // .exec((err, data) => {
-          //   console.log('populated', data)
-          //   res.status(201).json({ chain: chain.toObject() })
+// .populate('chains')
+// .exec((err, data) => {
+//   console.log('populated', data)
+//   res.status(201).json({ chain: chain.toObject() })
 
-          // })
-      // Story.
-      //   findOne({ title: 'Casino Royale' }).
-      //   populate('author').
-      //   exec(function (err, story) {
-      //     if (err) return handleError(err);
-      //     console.log('The author is %s', story.author.name);
-      //     // prints "The author is Ian Fleming"
-      //   });
-    
-    // if an error occurs, pass it off to our error handler
-    // the error handler needs the error message and the `res` object so that it
-    // can send an error message back to the client
-    // .catch(err => handle(err, res))
-})
+// })
+// Story.
+//   findOne({ title: 'Casino Royale' }).
+//   populate('author').
+//   exec(function (err, story) {
+//     if (err) return handleError(err);
+//     console.log('The author is %s', story.author.name);
+//     // prints "The author is Ian Fleming"
+//   });
+
+// if an error occurs, pass it off to our error handler
+// the error handler needs the error message and the `res` object so that it
+// can send an error message back to the client
+// .catch(err => handle(err, res))
 
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
@@ -170,7 +177,6 @@ router.post('/tasks', requireToken, (req, res) => {
 //   }
 // }
 router.patch('/tasks/:id', requireToken, (req, res) => {
-
   Chain.find({})
     .then(console.log)
   Task.findById(req.params.id)
@@ -183,7 +189,6 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // for this task, find either only chain where dayBroken is null, or sort
       // chain and find last, which also should have unset dayBroken
       const latestChainIndex = task.chains.length - 1
-
 
       const chainId = task.chains[latestChainIndex].id
 
