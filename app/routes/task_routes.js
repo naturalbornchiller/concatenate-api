@@ -91,7 +91,7 @@ router.post('/tasks', requireToken, (req, res) => {
   Task.create(req.body.task)
     .then(task => {
       // make a new chain
-      const chain = new Chain()
+      const chain = new Chain() // ERROR IS HERE!!!!
 
       // update the task with the new chain (IMPORTANT: you need to pass the {new: true})
       // option for ths Promise to return the updated version of the task to the next
