@@ -34,9 +34,7 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-// make this into a middleware such that it can be run after requireToken in
-// each route on every request
-// https://expressjs.com/en/guide/using-middleware.html
+// this middleware breaks chains that haven't been updated
 const breakAllChains = (req, res, next) => {
 
   // find all tasks
@@ -44,10 +42,6 @@ const breakAllChains = (req, res, next) => {
     .then(tasks => {
       // loop through current users tasks
       tasks.forEach(task => {
-        console.log('\n\n--------NewChain------')
-        console.log('\nBefore Mod')
-        console.log(task.chains)
-        console.log('\n\n')
         // if task has chains
         if (!task.chains === undefined & !task.chains.length === 0) {
           // index of last chain in task.chains
@@ -63,9 +57,6 @@ const breakAllChains = (req, res, next) => {
 
             // save the modified task
             task.save()
-            console.log('\n\nAfter Mod')
-            console.log(task.chains)
-            console.log('\n\n')
           }
         }
       })
@@ -95,14 +86,15 @@ router.get('/tasks', requireToken, breakAllChains, (req, res) => {
 
 // SHOW
 // GET /tasks/5a7db6c74d55bc51bdf39793
-router.get('/tasks/:id', requireToken, (req, res) => {
+router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
     // if `findById` is successful, respond with 200 and "example" JSON
     .then(task => {
+      requireOwnership(req, task)
       if (req.user._id.equals(task.owner)) {
-        return res.status(200).json({ task: task.toObject() })
+        return res.status(200).json({ chains: task.chains.toObject() })
       } else {
         return new Error('Task not owned by requesting user.')
       }
@@ -113,21 +105,14 @@ router.get('/tasks/:id', requireToken, (req, res) => {
 
 // CREATE
 // POST /tasks
-router.post('/tasks', requireToken, (req, res) => {
+router.post('/tasks', requireToken, breakAllChains, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
 
   // create a new task
   Task.create(req.body.task)
-    .then(task => {
-      // make a new chain
-      const chain = new Chain() // ERROR IS HERE!!!!
-
-      // update the task with the new chain (IMPORTANT: you need to pass the {new: true})
-      // option for ths Promise to return the updated version of the task to the next
-      // step of the promise chain
-      return Task.findByIdAndUpdate(task._id, { $push: { chains: chain } }, { new: true })
-    })
+    // find task and push new chain to it
+    .then(task => Task.findByIdAndUpdate(task._id, { $push: { chains: new Chain() } }, { new: true }))
 
     // return the updated task data
     .then(task => res.status(201).json({ task: task }))
@@ -144,7 +129,7 @@ router.post('/tasks', requireToken, (req, res) => {
 //     id: <task id>
 //   }
 // }
-router.patch('/tasks/:id', requireToken, (req, res) => {
+router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -167,14 +152,13 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
     .catch(err => {
-      console.log('error')
       handle(err, res)
     })
 })
 
 // DESTROY
 // DELETE /task/5a7db6c74d55bc51bdf39793
-router.delete('/tasks/:id', requireToken, (req, res) => {
+router.delete('/tasks/:id', requireToken, breakAllChains, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
