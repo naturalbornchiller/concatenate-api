@@ -1,8 +1,10 @@
+/* eslint-disable padded-blocks */
 // pull in Mongoose model for taskss
 const mongoose = require('mongoose')
 
 const Task = require('../models/task')
 const { Chain } = require('../models/chain')
+const User = require('../models/user')
 // const Chain = require('../models/task')
 
 // Express docs: http://expressjs.com/en/api.html
@@ -35,18 +37,46 @@ const router = express.Router()
 // make this into a middleware such that it can be run after requireToken in
 // each route on every request
 // https://expressjs.com/en/guide/using-middleware.html
-// const breakAllChains = (req, res, next) => {
-//   Task.find({ owner: req.user.id })
-//     .then(tasks => {
-//       tasks.forEach(task => task[task.length - 1].breakChain())
-//     })
-//     .then(next)
-// }
+const breakAllChains = (req, res, next) => {
+
+  // find all tasks
+  Task.find({ owner: req.user._id })
+    .then(tasks => {
+      // loop through current users tasks
+      tasks.forEach(task => {
+        console.log('\n\n--------NewChain------')
+        console.log('\nBefore Mod')
+        console.log(task.chains)
+        console.log('\n\n')
+        // if task has chains
+        if (!task.chains === undefined & !task.chains.length === 0) {
+          // index of last chain in task.chains
+          const latestChainIdx = task.chains.length - 1
+
+          // if they haven't concatenated in 48hrs
+          if (new Date() - task.chains[latestChainIdx].lastConcat > 172800000) {
+            // break the chain
+            task.chains[latestChainIdx].dayBroken = new Date()
+
+            // and push new chain to task
+            task.chains.push(new Chain())
+
+            // save the modified task
+            task.save()
+            console.log('\n\nAfter Mod')
+            console.log(task.chains)
+            console.log('\n\n')
+          }
+        }
+      })
+    })
+    .then(next)
+}
 // router.use(breakAllChains)
 
 // INDEX
 // GET /tasks - now returns only users tasks
-router.get('/tasks', requireToken, (req, res) => {
+router.get('/tasks', requireToken, breakAllChains, (req, res) => {
   Task.find()
     .then(tasks => {
       // filter only tasks owned by the user
