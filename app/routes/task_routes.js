@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 
 const Task = require('../models/task')
-const Chain = require('../models/chain')
+const { Chain } = require('../models/chain')
 // const Chain = require('../models/task')
 
 // Express docs: http://expressjs.com/en/api.html
@@ -115,8 +115,6 @@ router.post('/tasks', requireToken, (req, res) => {
 //   }
 // }
 router.patch('/tasks/:id', requireToken, (req, res) => {
-  Chain.find({})
-    .then(console.log)
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -124,29 +122,16 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // it will throw an error if the current user isn't the owner
       requireOwnership(req, task)
 
-      // for this task, find either only chain where dayBroken is null, or sort
-      // chain and find last, which also should have unset dayBroken
-      const latestChainIndex = task.chains.length - 1
+      // latest chain
+      const latestChainIdx = task.chains.length - 1
 
-      const chainId = task.chains[latestChainIndex].id
-
-      // console.log(chainId)
-
-      // Chain.findById(chainId).then((chain) => console.log('chain is ',chain)).catch(console.error)
-      // console.log(chain.updateConcat)
-
-      return chainId
-
-      // // changes chain at latestChainIndex to have
-      // // the date and time right now
-      // task.chains[latestChainIndex].updateConcat()
-
-      // // pass the result of Mongoose's `.update` to the next `.then`
-      // return task.update(task)
-    })
-    .then(Chain.findById)
-    .then(chain => {
-      chain.updateConcat()
+      // can only update chain if last concat was atleast a day ago
+      if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
+        task.chains[latestChainIdx].lastConcat = new Date()
+        task.save()
+      } else {
+        return new Error('Must wait at least 24 hours between concats')
+      }
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
