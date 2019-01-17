@@ -4,7 +4,7 @@ const chainSchema = new mongoose.Schema(
   {
     dayStarted: {
       type: Date,
-      default: new Date()
+      default: () => new Date()
     },
     dayBroken: {
       type: Date,
