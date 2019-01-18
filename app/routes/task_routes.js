@@ -94,7 +94,7 @@ router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
     .then(task => {
       requireOwnership(req, task)
       if (req.user._id.equals(task.owner)) {
-        return res.status(200).json({ chains: task.chains.toObject() })
+        return res.status(200).json({ task: task.toObject() })
       } else {
         return new Error('Task not owned by requesting user.')
       }
