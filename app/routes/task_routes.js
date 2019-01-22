@@ -137,12 +137,18 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
       // latest chain
       const latestChainIdx = task.chains.length - 1
 
-      // can only update chain if last concat was atleast a day ago
-      if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
-        task.chains[latestChainIdx].lastConcat = new Date()
+      // if chain isn't broken
+      if (!task.chains[latestChainIdx].dayBroken) {
+        // and it's been between 24 and 48 hrs since last concat
+        if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
+          // add a link to the chain
+          task.chains[latestChainIdx].lastConcat = new Date()
+          task.save()
+        }
+      } else { // if chain is broken
+        // update creates a new chain
+        task.chains.push(new Chain())
         task.save()
-      } else {
-        return new Error('Must wait at least 24 hours between concats')
       }
     })
     // if that succeeded, return 204 and no JSON
