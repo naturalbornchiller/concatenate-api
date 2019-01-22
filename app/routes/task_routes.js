@@ -144,6 +144,9 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
           // add a link to the chain
           task.chains[latestChainIdx].lastConcat = new Date()
           task.save()
+        } else {
+          // throw meaningful error
+          return new Error('A full day must pass before next concat!')
         }
       } else { // if chain is broken
         // update creates a new chain
