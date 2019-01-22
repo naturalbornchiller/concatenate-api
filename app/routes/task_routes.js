@@ -52,9 +52,6 @@ const breakAllChains = (req, res, next) => {
             // break the chain
             task.chains[latestChainIdx].dayBroken = new Date()
 
-            // and push new chain to task
-            task.chains.push(new Chain())
-
             // save the modified task
             task.save()
           }
