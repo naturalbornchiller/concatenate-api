@@ -35,8 +35,8 @@ const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
 // this middleware breaks chains that haven't been updated
-const breakAllChains = (req, res, next) => {
-  console.log('I\'m in breakAllChains') // NOT BEING LOGGED
+const breakOldChains = (req, res, next) => {
+  console.log('I\'m in breakOldChains') // ERROR! - NOT BEING LOGGED
 
   // find all tasks
   Task.find({ owner: req.user._id })
@@ -51,7 +51,7 @@ const breakAllChains = (req, res, next) => {
           // if they haven't concatenated in 48hrs
           if (new Date() - task.chains[latestChainIdx].lastConcat > 172800000) {
             // break the chain
-            task.chains[latestChainIdx].dayBroken = new Date()
+            task.chains[latestChainIdx].dateBroken = new Date()
 
             // save the modified task
             task.save()
@@ -62,13 +62,14 @@ const breakAllChains = (req, res, next) => {
         }
       })
     })
-    .then(next)
+    .then(() => next())
 }
-// router.use(breakAllChains)
+// router.use(breakOldChains)
 
 // INDEX
 // GET /tasks - now returns only users tasks
-router.get('/tasks', requireToken, breakAllChains, (req, res) => {
+router.get('/tasks', requireToken, (req, res) => {
+  console.log('Inside index')
   Task.find()
     .then(tasks => {
       // filter only tasks owned by the user
@@ -87,7 +88,7 @@ router.get('/tasks', requireToken, breakAllChains, (req, res) => {
 
 // SHOW
 // GET /tasks/5a7db6c74d55bc51bdf39793
-router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.get('/tasks/:id', requireToken, (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
@@ -106,7 +107,7 @@ router.get('/tasks/:id', requireToken, breakAllChains, (req, res) => {
 
 // CREATE
 // POST /tasks
-router.post('/tasks', requireToken, breakAllChains, (req, res) => {
+router.post('/tasks', requireToken, (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
 
@@ -130,7 +131,7 @@ router.post('/tasks', requireToken, breakAllChains, (req, res) => {
 //     id: <task id>
 //   }
 // }
-router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.patch('/tasks/:id', requireToken, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -142,7 +143,7 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
       const latestChainIdx = task.chains.length - 1
 
       // if chain isn't broken
-      if (!task.chains[latestChainIdx].dayBroken) {
+      if (!task.chains[latestChainIdx].dateBroken) {
         // and it's been between 24 and 48 hrs since last concat
         if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
           // add a link to the chain
@@ -168,7 +169,7 @@ router.patch('/tasks/:id', requireToken, breakAllChains, (req, res) => {
 
 // DESTROY
 // DELETE /task/5a7db6c74d55bc51bdf39793
-router.delete('/tasks/:id', requireToken, breakAllChains, (req, res) => {
+router.delete('/tasks/:id', requireToken, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {

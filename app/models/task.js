@@ -19,42 +19,25 @@ const taskSchema = new mongoose.Schema(
   }
 )
 
-// chainSchema.virtual('chainLength').get(function () {
-//   // if dayBroken is TRUE return dayBroken minus dayStarted,
-//   // else return Today's date minus dayStarted
-//   // note: 86400000 = one day in milliseconds
-//   return ((this.dayBroken || new Date()) - this.dayStarted) / 86400000
-// })
+// returns index of longest chain for this task
+taskSchema.virtual('longestChainIndex').get(function () {
+  // stores the length of the biggest chain in the array
+  const maxLength = Math.max.apply(null, this.chains.map(c => c.length))
 
-// taskSchema.virtual('longestChain').get(function () {
-//   // returns longest chain for this task
-//   return Math.max.apply(null, this.chains.map(chain => chain.chainLength))
-// })
+  // returns the index of that length
+  // note: does not handle duplicate maxLengths
+  return this.chains.findIndex(c => c.length === maxLength)
+})
 
-// taskSchema.virtual('totalDays').get(function () {
-//   // returns all days inwhich task was completed
-//   return this.chains.reduce((totalDays, currChain) => totalDays + currChain.chainLength, 0)
-// })
+// returns all days inwhich task was completed
+taskSchema.virtual('combinedLength').get(function () {
+  return this.chains.reduce((total, chain) => total + chain.length, 0)
+})
 
-// taskSchema.virtual('taskStarted').get(function () {
-//   // returns date that task was first started
-//   return this.chains[0].dayStarted
-// })
-
-/*
-chains: [
-  {
-    day_started: <day>,
-    day_broken: <day e.g., 2019-10-10>,
-    last_concat: <day e.g., 2019-10-10>
-  },
-  {
-    day_started: <day>,
-    day_broken: null,
-    last_concat: <today>
-  }
-]
-*/
+// returns date that task was first started
+taskSchema.virtual('taskStarted').get(function () {
+  return this.chains[0].dateStarted
+})
 
 const Task = mongoose.model('Task', taskSchema)
 module.exports = Task

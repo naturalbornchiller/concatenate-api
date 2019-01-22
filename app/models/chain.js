@@ -2,11 +2,11 @@ const mongoose = require('mongoose')
 
 const chainSchema = new mongoose.Schema(
   {
-    dayStarted: {
+    dateStarted: {
       type: Date,
       default: () => new Date()
     },
-    dayBroken: {
+    dateBroken: {
       type: Date,
       default: () => null
     },
@@ -24,31 +24,28 @@ const chainSchema = new mongoose.Schema(
   }
 )
 
-// chainSchema.virtual("breakChain").set(function() {
-//   // if chain is NOT broken - and the difference
-//   // between now and the latestConcat > than 1 day
-//   // note: one day is 1000ms * 60 * 60 * 24
-//   if (!this.dayBroken && new Date() - this.lastConcat > 86400000) {
-//     // chain is broken on todays date
-//     this.dayBroken = new Date();
-//     return true;
-//   } else {
-//     return false;
-//   }
-// });
+// get if chain can be concated
+chainSchema.virtual('concatAvailable').get(function () {
+  return !this.dateBroken && new Date() - this.lastConcat > 86400000
+})
 
-// chainSchema.virtual("updateConcat").set(function() {
-//   // if chain is NOT broken - and the difference
-//   // between now and the latestConcat > than 1 day
-//   // note: one day is 1000ms * 60 * 60 * 24
-//   if (!this.dayBroken) {
-//     // chain is broken on todays date
-//     this.lastConcat = new Date();
-//     return true;
-//   } else {
-//     return false;
-//   }
-// });
+// gets the length of the chain (in days)
+chainSchema.virtual('length').get(function () {
+  // time difference in ms between dateChainWasStarted
+  // and dateOfLastConcat, divided by number of ms in a day,
+  // and floored for convenience
+  return Math.floor((this.lastConcat - this.dateStarted) / 86400000)
+})
+
+// gets the countdown until the chain breaks (in hrs)
+chainSchema.virtual('hoursToBreak').get(function () {
+  const { lastConcat, dateBroken } = this
+  if (!dateBroken) {
+    return Math.ceil(48 - ((new Date() / 86400000) - (new Date(lastConcat) / 86400000)) * 24)
+  } else {
+    return false
+  }
+})
 
 const Chain = mongoose.model('Chain', chainSchema)
 module.exports = { Chain, chainSchema }
