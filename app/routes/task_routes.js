@@ -36,6 +36,7 @@ const router = express.Router()
 
 // this middleware breaks chains that haven't been updated
 const breakAllChains = (req, res, next) => {
+  console.log('I\'m in breakAllChains') // NOT BEING LOGGED
 
   // find all tasks
   Task.find({ owner: req.user._id })
@@ -54,6 +55,9 @@ const breakAllChains = (req, res, next) => {
 
             // save the modified task
             task.save()
+            
+            // log the task
+            console.log(task)
           }
         }
       })
