@@ -26,7 +26,7 @@ const chainSchema = new mongoose.Schema(
 
 // get if chain can be concated
 chainSchema.virtual('concatAvailable').get(function () {
-  return !this.dateBroken && new Date() - this.lastConcat > 86400000
+  return !this.dateBroken && (new Date() - this.lastConcat > 86400000)
 })
 
 // gets the length of the chain (in days)

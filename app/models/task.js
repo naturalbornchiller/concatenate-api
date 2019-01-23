@@ -25,18 +25,19 @@ taskSchema.virtual('longestChainIndex').get(function () {
   const maxLength = Math.max.apply(null, this.chains.map(c => c.length))
 
   // returns the index of that length
+  // or -1 if the chains array is empty
   // note: does not handle duplicate maxLengths
   return this.chains.findIndex(c => c.length === maxLength)
 })
 
 // returns all days inwhich task was completed
-taskSchema.virtual('combinedLength').get(function () {
+taskSchema.virtual('combinedChainLength').get(function () {
   return this.chains.reduce((total, chain) => total + chain.length, 0)
 })
 
 // returns date that task was first started
 taskSchema.virtual('taskStarted').get(function () {
-  return this.chains[0].dateStarted
+  return this.chains.length ? this.chains[0].dateStarted : false
 })
 
 const Task = mongoose.model('Task', taskSchema)

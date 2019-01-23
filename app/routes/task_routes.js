@@ -36,7 +36,6 @@ const router = express.Router()
 
 // this middleware breaks chains that haven't been updated
 const breakOldChains = (req, res, next) => {
-  console.log('I\'m in breakOldChains') // ERROR! - NOT BEING LOGGED
 
   // find all tasks
   Task.find({ owner: req.user._id })
@@ -55,10 +54,9 @@ const breakOldChains = (req, res, next) => {
 
             // save the modified task
             task.save()
-            
-            // log the task
-            console.log(task)
           }
+          // log the task
+          console.log(task)
         }
       })
     })
@@ -88,7 +86,7 @@ router.get('/tasks', requireToken, (req, res) => {
 
 // SHOW
 // GET /tasks/5a7db6c74d55bc51bdf39793
-router.get('/tasks/:id', requireToken, (req, res) => {
+router.get('/tasks/:id', requireToken, breakOldChains, (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
@@ -113,8 +111,8 @@ router.post('/tasks', requireToken, (req, res) => {
 
   // create a new task
   Task.create(req.body.task)
-    // find task and push new chain to it
-    .then(task => Task.findByIdAndUpdate(task._id, { $push: { chains: new Chain() } }, { new: true }))
+    // // find task and push new chain to it
+    // .then(task => Task.findByIdAndUpdate(task._id, { $push: { chains: new Chain() } }, { new: true }))
 
     // return the updated task data
     .then(task => res.status(201).json({ task: task }))
@@ -142,27 +140,30 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // latest chain
       const latestChainIdx = task.chains.length - 1
 
-      // if chain isn't broken
-      if (!task.chains[latestChainIdx].dateBroken) {
-        // and it's been between 24 and 48 hrs since last concat
-        if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
-          // add a link to the chain
-          task.chains[latestChainIdx].lastConcat = new Date()
-          task.save()
-        } else {
-          // throw meaningful error
-          return new Error('A full day must pass before next concat!')
-        }
-      } else { // if chain is broken
-        // update creates a new chain
+      // if there are no chains OR chain is broken
+      if (task.chains.length === 0 || task.chains[latestChainIdx].dateBroken) {
+        // create a new chain and push it to the array
         task.chains.push(new Chain())
         task.save()
+
+      // else if it's been over 24 and 48
+      // hours since the last concat
+      } else if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
+        // add a link to the chain
+        task.chains[latestChainIdx].lastConcat = new Date()
+        // save the task
+        task.save()
+
+      } else { // otherwise
+        // throw meaningful error
+        return new Error('A full day must pass before next concat!')
       }
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
     .catch(err => {
+      console.log('Inside catch')
       handle(err, res)
     })
 })

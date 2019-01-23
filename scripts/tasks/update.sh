@@ -2,8 +2,7 @@
 
 API="http://localhost:4741"
 URL_PATH="/tasks"
-# TOKEN=ad410895f4171779f1b30bd4991b66a6
-ID=5c3ca5d7335a022cc94b0a58
+ID=5c4895277b3633db170f9dc1
 
 curl "${API}${URL_PATH}/${ID}" \
   --request PATCH \
