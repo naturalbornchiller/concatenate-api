@@ -67,7 +67,6 @@ const breakOldChains = (req, res, next) => {
 // INDEX
 // GET /tasks - now returns only users tasks
 router.get('/tasks', requireToken, (req, res) => {
-  console.log('Inside index')
   Task.find()
     .then(tasks => {
       // filter only tasks owned by the user
@@ -119,6 +118,7 @@ router.post('/tasks', requireToken, (req, res) => {
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
 router.patch('/tasks/:id', requireToken, (req, res) => {
+  console.log(req)
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -134,7 +134,6 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
 
         // create a new chain and push it to the array
         task.chains = task.chains.concat([new Chain()])
-
         return task.save()
 
       // if it's been over 24 hrs
@@ -151,7 +150,7 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       }
     })
     // if that succeeded, return 204 and no JSON
-    .then((msg) => {
+    .then(msg => {
       console.log(msg)
       res.sendStatus(204)
     })
