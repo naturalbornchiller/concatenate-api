@@ -16,11 +16,16 @@ track the repetition of tasks and form habits.
 The idea for this app stems from advice that developer and comic Brad Isaac received from Jerry Seinfield in a comedy club. Isaac tells it like this:
 
 > Years ago when Seinfeld was a new television show, Jerry Seinfeld was still a touring comic. At the time, I was hanging around clubs doing open mic nights and trying to learn the ropes. One night I was in the club where Seinfeld was working, and before he went on stage, I saw my chance. I had to ask Seinfeld if he had any tips for a young comic. What he told me was something that would benefit me a lifetime...
+
 > He said the way to be a better comic was to create better jokes and the way to create better jokes was to write every day. But his advice was better than that. He had a gem of a leverage technique he used on himself and you can use it to motivate yourself—even when you don't feel like it.
+
 > He revealed a unique calendar system he uses to pressure himself to write. Here's how it works.
+
 > He told me to get a big wall calendar that has a whole year on one page and hang it on a prominent wall. The next step was to get a big red magic marker.
+
 > He said for each day that I do my task of writing, I get to put a big red X over that day. "After a few days you'll have a chain. Just keep at it and the chain will grow longer every day. You'll like seeing that chain, especially when you get a few weeks under your belt. Your only job next is to not break the chain."
->"Don't break the chain," he said again for emphasis.[1](https://lifehacker.com/jerry-seinfelds-productivity-secret-281626 "source")
+
+> "Don't break the chain," he said again for emphasis.[1](https://lifehacker.com/jerry-seinfelds-productivity-secret-281626 "source")
 
 It took me a while to realize the importance of incremental growth, but now that I do, I can't overstate its benefits enough. By doing something once a day, a person can transform themselves, bit by bit. For that reason the above quote resonated with me.
 ___
@@ -109,9 +114,10 @@ echo
 ```
 
 __Update__ one Task
+
 note! - this will either:
-a. create a new chain, if the last chain is broken or if there are no chains yet created, else
-b. concatenate onto the chain if it's been between 24 and 48 hours since the last concat
+1. create a new chain, if the last chain is broken or if there are no chains yet created, else
+2. concatenate onto the chain if it's been between 24 and 48 hours since the last concat
 ```
 #!/bin/bash
 
