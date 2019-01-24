@@ -126,15 +126,16 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // it will throw an error if the current user isn't the owner
       requireOwnership(req, task)
 
-      // latest chain
-      const latestChainIdx = task.chains.length - 1
+      // index of latest chain
+      let latestChainIdx = task.chains.length - 1
 
       // if there are no chains OR chain is broken,
       if (task.createChainAvailable) {
+
         // create a new chain and push it to the array
-        task.chains.push(new Chain())
-        console.log(task)
-        return task.save() // - ERROR ON SAVE CHAIN
+        task.chains = task.chains.concat([new Chain()])
+
+        return task.save()
 
       // if it's been over 24 hrs
       // since the last concat,
@@ -150,7 +151,10 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       }
     })
     // if that succeeded, return 204 and no JSON
-    .then(() => res.sendStatus(204))
+    .then((msg) => {
+      console.log(msg)
+      res.sendStatus(204)
+    })
     // if an error occurs, pass it to the handler
     .catch(err => handle(err, res))
 })
