@@ -103,9 +103,7 @@ curl "${API}${URL_PATH}/${ID}" \
 echo
 ```
 
-__Update__ one Task - will either
-a. create a new chain, if the last chain is broken or if there are no chains yet created
-b. concatenate onto the chain if it's been between 24 and 48 hours since the last concat
+__Update__ one Task  note: this will either  a. create a new chain, if the last chain is broken or if there are no chains yet created or  b. concatenate onto the chain if it's been between 24 and 48 hours since the last concat
 ```
 #!/bin/bash
 
