@@ -25,7 +25,7 @@ The idea for this app stems from advice that developer and comic Brad Isaac rece
 >
 > He said for each day that I do my task of writing, I get to put a big red X over that day. "After a few days you'll have a chain. Just keep at it and the chain will grow longer every day. You'll like seeing that chain, especially when you get a few weeks under your belt. Your only job next is to not break the chain."
 >
-> "Don't break the chain," he said again for emphasis.[1](https://lifehacker.com/jerry-seinfelds-productivity-secret-281626 "source")
+> "Don't break the chain," he said again for emphasis. [[1]](https://lifehacker.com/jerry-seinfelds-productivity-secret-281626 "source")
 
 It took me a while to realize the importance of incremental growth, but now that I do, I can't overstate its benefits enough. By doing something once a day, a person can transform themselves, bit by bit. For that reason the above quote resonated with me.
 ___
