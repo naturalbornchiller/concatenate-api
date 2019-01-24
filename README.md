@@ -19,16 +19,18 @@ The idea for this app stems from advice that developer and comic Brad Isaac rece
 
 It took me a while to realize the importance of incremental growth, but now that I do, I can't overstate its benefits enough. By doing something once a day, a person can transform themselves, bit by bit. For that reason the above quote resonated with me.
 ___
-I began the process of building an app from the ground up. I started with user stories and ERDs, picked which tools to use and began to articulate, on paper first, then programmatically, how the data might be stored, then be retrieved and displayed on the client side.
+I began the process of building an app from the ground up. I started with user stories and ERDs, picked which tools to use, and began to articulate, on paper first, then programmatically, how the data might be stored, then retrieved and displayed for the client.
 
-I started with the server, because I needed to devise a way of storing data that evolves with time. This enterprise was more difficult than I initially imagined because of two unforseeables:
+Because I needed to devise a way of storing data that evolves with time, I started with the server. This enterprise was more difficult than I initially imagined because of two unforseeables:
 1. Using Express with Mongoose is hard as ****. It's not at all an intuitive technology to pick up and persisting evolving nested data sets is neither simple nor well-documented.
-2. Dealing with JavaScript's Date objects is a pain. I'm not that quantitative to begin with, and having to manipulate Date objects and then convert from milliseconds to minutes/hours/days and back leaves a ton of room for error.
+2. Dealing with JavaScript's Date objects is a pain. I'm not that quantitative to begin with, and having to manipulate Date objects and then convert from milliseconds to minutes/hours/days, from strings to numbers and back, leaves a ton of room for error.
 Which is not to say I didn't enjoy solving date/time puzzles or taming the legendary Mongoose. In fact, I very much did.
 
-The next hurdle I volunteered myself to overcome was using React. I'm glad I spent time familiarizing myself with React, as it's a tool I want to use for future projects; however I really could have stuck to Vanilla JS for this one.
+The next hurdle I volunteered myself to overcome was using React. I'm glad I spent time familiarizing myself with React, as it's a tool I want to use for future projects; however I really could have stuck to Vanilla JS for this one. That said, I really got to see the power of the library, how, with state and props, one can circulate data throughout the body of a program. And I'm excited to learn more!
 
-Most of my process involved trial by fire. I'd stare at a big problem (how to represent the chains programmatically) and parse it into subproblems (what is a chain? an array of days. how to store it in the backend? as an object containing first and last day. how does the chain break? if it's been 48 hours since the user last added to the chain.  )
+Most of my process involved trial-and-error. I'd stare at a big problem (How to represent the chains programmatically?) and parse it into related subproblems (What is a chain? How is a chain broken? How is it extended? How can I efficiently store it in the backend?). I found that, by solving these subproblems in succession, I could effectively answer the superproblem—and I did so mostly by playing until the pieces fit.
+
+Lastly, this time around, I learned a lot about debugging. The secret is CONSOLE LOG EVERYTHING. By doing so your program is laid bare—you can see exactly what each variable holds and how it is mutated by the functions you thought did something completely different.
 
 #### Goals for Future Incarnations
 Ideally, I'd like for this to be an app, with reminders and whatnot. Bar that, I want to display the "chains" on a full-year calendar, rather than as discrete threads. I'd like to present the user with more data on their chains (totalDaysTracked, combinedChainLength, etc.). Finally I'd like to make the UI satisfying to view and use.
