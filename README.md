@@ -33,8 +33,107 @@ Most of my process involved trial-and-error. I'd stare at a big problem (How to 
 Lastly, this time around, I learned a lot about debugging. The secret is CONSOLE LOG EVERYTHING. By doing so your program is laid bare—you can see exactly what each variable holds and how it is mutated by the functions you thought did something completely different.
 
 #### Goals for Future Incarnations
-Ideally, I'd like for this to be an app, with reminders and whatnot. Bar that, I want to display the "chains" on a full-year calendar, rather than as discrete threads. I'd like to present the user with more data on their chains (totalDaysTracked, combinedChainLength, etc.). Finally I'd like to make the UI satisfying to view and use.
+Ideally, I'd like for this to be an app, with reminders and whatnot. Bar that, I want to display the "chains" on a full-year calendar, rather than as discrete threads. Also, I'd like to present the user with more data on their chains (totalDaysTracked, combinedChainLength, etc.). Finally I'd like to make the UI more satisfying to view and use.
+
+#### Routes used
+After signing in, this is how the resource requests should be formatted:
+
+__Post__ a Task
+```
+#!/bin/bash
+
+API="http://localhost:4741"
+URL_PATH="/tasks"
+
+curl "${API}${URL_PATH}/" \
+  --request POST \
+  --header "Content-Type: application/json" \
+  --header "Authorization: Bearer ${TOKEN}" \
+  --data '{
+    "task": {
+      "name": "'"${NAME}"'"
+    }
+  }' \
+  | json_pp
+
+echo
+```
+
+__Index__ all Tasks
+```
+#!/bin/sh
+
+API="http://localhost:4741"
+URL_PATH="/tasks"
+
+curl "${API}${URL_PATH}" \
+  --request GET \
+  --header "Authorization: Bearer ${TOKEN}" \
+  | json_pp
+
+echo
+```
+
+__Show__ one Task
+```
+#!/bin/sh
+
+API="http://localhost:4741"
+URL_PATH="/tasks"
+ID=5c4895277b3633db170f9dc1
+
+curl "${API}${URL_PATH}/${ID}" \
+  --request GET \
+  --header "Authorization: Bearer ${TOKEN}" \
+  | json_pp
+
+echo
+```
+
+__Delete__ one Task
+```
+#!/bin/sh
+
+API="http://localhost:4741"
+URL_PATH="/tasks"
+ID=5c4895277b3633db170f9dc1
+
+curl "${API}${URL_PATH}/${ID}" \
+  --request DELETE \
+  --header "Authorization: Bearer ${TOKEN}" \
+  | json_pp
+
+echo
+```
+
+__Update__ one Task - will either
+a. create a new chain, if the last chain is broken or if there are no chains yet created
+b. concatenate onto the chain if it's been between 24 and 48 hours since the last concat
+```
+#!/bin/bash
+
+API="http://localhost:4741"
+URL_PATH="/tasks"
+ID=5c4895277b3633db170f9dc1
+
+curl "${API}${URL_PATH}/${ID}" \
+  --request PATCH \
+  --header "Content-Type: application/json" \
+  --header "Authorization: Bearer ${TOKEN}" \
+  | json_pp
+
+echo
+```
+
+For info on how to format authentication requests please click [here](https://git.generalassemb.ly/ga-wdi-boston/express-api-template "auth").
+
+#### Local setup
+1. Fork and clone this repo
+2. Install dependencies `npm i`
+3. Wreak havoc
 
 ##### Technologies Used
 - Backend: Node with Express.js and Mongoose
 - Frontend: HTML, SCSS, JavaScript, React
+___
+Lastly, [here](https://projects.invisionapp.com/freehand/document/sik2MYH0G) is a link to the ERD!
