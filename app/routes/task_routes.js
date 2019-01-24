@@ -111,24 +111,13 @@ router.post('/tasks', requireToken, (req, res) => {
 
   // create a new task
   Task.create(req.body.task)
-    // // find task and push new chain to it
-    // .then(task => Task.findByIdAndUpdate(task._id, { $push: { chains: new Chain() } }, { new: true }))
-
     // return the updated task data
     .then(task => res.status(201).json({ task: task }))
-
     // if an error occurs, pass it to the handler
     .catch(err => handle(err, res))
 })
-
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
-
-// data: {
-//   task { 
-//     id: <task id>
-//   }
-// }
 router.patch('/tasks/:id', requireToken, (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
@@ -140,21 +129,21 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       // latest chain
       const latestChainIdx = task.chains.length - 1
 
-      // if there are no chains OR chain is broken
+      // if there are no chains OR chain is broken,
       if (task.chains.length === 0 || task.chains[latestChainIdx].dateBroken) {
         // create a new chain and push it to the array
         task.chains.push(new Chain())
-        task.save()
+        return task.save() // - ERROR ON SAVE CHAIN
 
-      // else if it's been over 24 and 48
-      // hours since the last concat
+      // if it's been over 24 hrs
+      // since the last concat,
       } else if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
         // add a link to the chain
         task.chains[latestChainIdx].lastConcat = new Date()
-        // save the task
-        task.save()
+        return task.save()
 
-      } else { // otherwise
+      // otherwise,
+      } else {
         // throw meaningful error
         return new Error('A full day must pass before next concat!')
       }
@@ -162,10 +151,7 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
-    .catch(err => {
-      console.log('Inside catch')
-      handle(err, res)
-    })
+    .catch(err => handle(err, res))
 })
 
 // DESTROY
