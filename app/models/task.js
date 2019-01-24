@@ -45,7 +45,7 @@ taskSchema.virtual('createChainAvailable').get(function () {
   // index of the last chain
   const latestChainIdx = this.chains.length - 1
 
-  // if the task has no chains or if the last chain is broken, add a chain
+  // if the task has no chains or if the last chain is broken, can add chain
   return this.chains.length === 0 || this.chains[latestChainIdx].dateBroken
 })
 
@@ -65,14 +65,14 @@ taskSchema.virtual('concatAvailable').get(function () {
 })
 
 // gets the countdown until the latest chain breaks (in hrs)
-chainSchema.virtual('hoursToBreak').get(function () {
+taskSchema.virtual('hoursToBreak').get(function () {
   // index of the last chain
   const latestChainIdx = this.chains.length - 1
 
   // if the task has chains AND the latest chain is not broken
   if (this.chains.length > 0 && !this.chains[latestChainIdx].dateBroken) {
     // return the time until it breaks
-    return Math.ceil(48 - ((new Date() / 86400000) - (new Date(lastConcat) / 86400000)) * 24)
+    return Math.ceil(48 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
   } else {
     // otherwise send false
     return false

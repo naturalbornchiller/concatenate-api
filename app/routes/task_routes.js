@@ -130,14 +130,15 @@ router.patch('/tasks/:id', requireToken, (req, res) => {
       const latestChainIdx = task.chains.length - 1
 
       // if there are no chains OR chain is broken,
-      if (task.chains.length === 0 || task.chains[latestChainIdx].dateBroken) {
+      if (task.createChainAvailable) {
         // create a new chain and push it to the array
         task.chains.push(new Chain())
+        console.log(task)
         return task.save() // - ERROR ON SAVE CHAIN
 
       // if it's been over 24 hrs
       // since the last concat,
-      } else if (new Date() - task.chains[latestChainIdx].lastConcat > 86400000) {
+      } else if (task.concatAvailable) {
         // add a link to the chain
         task.chains[latestChainIdx].lastConcat = new Date()
         return task.save()
