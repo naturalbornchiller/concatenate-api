@@ -148,4 +148,5 @@ Ideally, I'd like for this to be an app, with reminders and whatnot. Bar that, I
 - Backend: Node with Express.js and Mongoose
 - Frontend: HTML, SCSS, JavaScript, React
 ___
-Lastly, ![screenshot](https://user-images.githubusercontent.com/43046847/51719800-e2ed0980-2018-11e9-9856-fbe19808211a.png) is a link to the ERD!
+Lastly, here is the Entity Relationship Diagram!
+![screenshot](https://user-images.githubusercontent.com/43046847/51719800-e2ed0980-2018-11e9-9856-fbe19808211a.png) 
