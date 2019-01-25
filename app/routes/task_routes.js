@@ -115,10 +115,10 @@ router.post('/tasks', requireToken, (req, res) => {
     // if an error occurs, pass it to the handler
     .catch(err => handle(err, res))
 })
+
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
 router.patch('/tasks/:id', requireToken, (req, res) => {
-  console.log(req)
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {

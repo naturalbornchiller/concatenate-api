@@ -79,5 +79,20 @@ taskSchema.virtual('hoursToBreak').get(function () {
   }
 })
 
+// gets the countdown until user can concat (in hrs)
+taskSchema.virtual('hoursToConcat').get(function () {
+  // index of the last chain
+  const latestChainIdx = this.chains.length - 1
+
+  // if the task has chains AND the latest chain is not broken
+  if (this.chains.length > 0 && !this.chains[latestChainIdx].dateBroken) {
+    // return the time until it user can concat
+    return Math.ceil(24 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
+  } else {
+    // otherwise send false
+    return false
+  }
+})
+
 const Task = mongoose.model('Task', taskSchema)
 module.exports = Task
