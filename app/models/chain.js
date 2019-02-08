@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const moment = require('moment')
 
 const chainSchema = new mongoose.Schema(
   {
@@ -26,11 +27,12 @@ const chainSchema = new mongoose.Schema(
 
 // gets the length of the chain (in days)
 chainSchema.virtual('length').get(function () {
-  // time diff in ms between dateChainWasStarted
-  // and dateOfLastConcat (+1 because creation counts
-  // as a concat), divided by number of ms in a day,
-  // and ceil for convenience
-  return Math.ceil((this.lastConcat - this.dateStarted + 1) / 86400000)
+  // today and last concat floored
+  const today = moment().hours(0)
+  const lastConcat = moment(this.lastConcat).hours(0)
+
+  // difference between today and the last concat (in days)
+  return today.diff(lastConcat, 'days')
 })
 
 const Chain = mongoose.model('Chain', chainSchema)

@@ -52,8 +52,8 @@ taskSchema.virtual('createChainAvailable').get(function () {
 
 // get if last chain can be concated
 taskSchema.virtual('concatAvailable').get(function () {
-  // if the task has chains the concat is available
-  if (this.chains.length > 0) {
+  // if the task has chains and the last chain isn't broken
+  if (this.chains.length > 0 && !this.createChainAvailable) {
     // index of the last chain
     const latestChainIdx = this.chains.length - 1
 
@@ -61,8 +61,8 @@ taskSchema.virtual('concatAvailable').get(function () {
     const today = moment().hours(0)
     const lastConcat = moment(this.chains[latestChainIdx].lastConcat).hours(0)
 
-    // whether the latest chain is NOT broken AND it's been over 24hrs since the last concat
-    return !this.chains[latestChainIdx].dateBroken && today.diff(lastConcat, 'days') === 1
+    // return boolean: has it's been 1day since lastConcat?
+    return today.diff(lastConcat, 'days') === 1
   } else {
     // otherwise concat is NOT available
     return false
@@ -75,24 +75,13 @@ taskSchema.virtual('hoursToBreak').get(function () {
   const latestChainIdx = this.chains.length - 1
 
   // if the task has chains AND the latest chain is not broken
-  if (this.chains.length > 0 && !this.chains[latestChainIdx].dateBroken) {
+  if (this.chains.length > 0 && !this.createChainAvailable) {
     // return the time until it breaks
-    return Math.ceil(48 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
-  } else {
-    // otherwise send false
-    return false
-  }
-})
-
-// gets the countdown until user can concat (in hrs)
-taskSchema.virtual('hoursToConcat').get(function () {
-  // index of the last chain
-  const latestChainIdx = this.chains.length - 1
-
-  // if the task has chains AND the latest chain is not broken
-  if (this.chains.length > 0 && !this.chains[latestChainIdx].dateBroken) {
-    // return the time until it user can concat
-    return Math.ceil(24 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
+    // return Math.ceil(48 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
+    const lastConcat = moment(this.chains[latestChainIdx].lastConcat)
+    const lastConcatPlusTwoDays = lastConcat.add(2, 'days').hours(0)
+    const today = moment().hours(0)
+    return 
   } else {
     // otherwise send false
     return false
