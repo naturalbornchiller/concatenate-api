@@ -81,6 +81,7 @@ taskSchema.virtual('hoursToBreak').get(function () {
     const lastConcat = moment(this.chains[latestChainIdx].lastConcat)
     const lastConcatPlusTwoDays = lastConcat.add(2, 'days').hours(0)
     const today = moment().hours(0)
+    //TODO
     return 
   } else {
     // otherwise send false

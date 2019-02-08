@@ -34,6 +34,8 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
+//TODO convert to momentJS logic 
+
 // this middleware breaks chains that haven't been updated
 const breakOldChains = (req, res, next) => {
 
