@@ -51,8 +51,12 @@ const breakOldChains = (req, res, next) => {
         // index of last chain in task.chains
         const latestChainIdx = task.chains.length - 1
 
-        // if they haven't concatenated in 48hrs
-        if (new Date() - task.chains[latestChainIdx].lastConcat > 172800000) {
+        // today and last concatenation, floored
+        const today = moment().hours(0)
+        const lastConcat = moment(task.chains[latestChainIdx].lastConcat).hours(0)
+
+        // if they haven't concatenated in over 2 days
+        if (today.diff(lastConcat, 'days') > 2) {
           // get the day after last concat
           const newDay = task.chains[latestChainIdx].lastConcat
           newDay.setDate(task.chains[latestChainIdx].lastConcat.getDate() + 1)

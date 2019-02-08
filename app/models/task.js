@@ -76,13 +76,16 @@ taskSchema.virtual('hoursToBreak').get(function () {
 
   // if the task has chains AND the latest chain is not broken
   if (this.chains.length > 0 && !this.createChainAvailable) {
-    // return the time until it breaks
-    // return Math.ceil(48 - ((new Date() / 86400000) - (new Date(this.chains[latestChainIdx].lastConcat) / 86400000)) * 24)
+    // last concatenation
     const lastConcat = moment(this.chains[latestChainIdx].lastConcat)
+    // 2 days after last concatenation
     const lastConcatPlusTwoDays = lastConcat.add(2, 'days').hours(0)
+    // today
     const today = moment().hours(0)
-    //TODO
-    return 
+    
+    // difference, in hours, between today
+    // and 2 days from last concatenation
+    return today.diff(lastConcatPlusTwoDays, 'hours')
   } else {
     // otherwise send false
     return false
