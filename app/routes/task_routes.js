@@ -63,15 +63,16 @@ const breakOldChains = (req, res, next) => {
         }
       }
     })
-    .then(() => console.log('done!'))
+    .then(() => console.log('Broke old chains.'))
     .then(() => next())
     .catch(err => handle(err, res))
 }
-// router.use(breakOldChains)
+
+router.use(requireToken, breakOldChains)
 
 // INDEX
 // GET /tasks - now returns only users tasks
-router.get('/tasks', requireToken, breakOldChains, (req, res) => {
+router.get('/tasks', (req, res) => {
   Task.find()
     .then(tasks => {
       // filter only tasks owned by the user
@@ -90,7 +91,7 @@ router.get('/tasks', requireToken, breakOldChains, (req, res) => {
 
 // SHOW
 // GET /tasks/5a7db6c74d55bc51bdf39793
-router.get('/tasks/:id', requireToken, breakOldChains, (req, res) => {
+router.get('/tasks/:id', (req, res) => {
   // req.params.id will be set based on the `:id` in the route
   Task.findById(req.params.id)
     .then(handle404)
@@ -109,7 +110,7 @@ router.get('/tasks/:id', requireToken, breakOldChains, (req, res) => {
 
 // CREATE
 // POST /tasks
-router.post('/tasks', requireToken, breakOldChains, (req, res) => {
+router.post('/tasks', (req, res) => {
   // set owner of new task to be current user
   req.body.task.owner = req.user.id
 
@@ -123,7 +124,7 @@ router.post('/tasks', requireToken, breakOldChains, (req, res) => {
 
 // UPDATE
 // PATCH /tasks/5a7db6c74d55bc51bdf39793
-router.patch('/tasks/:id', requireToken, breakOldChains, (req, res) => {
+router.patch('/tasks/:id', (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {
@@ -165,7 +166,7 @@ router.patch('/tasks/:id', requireToken, breakOldChains, (req, res) => {
 
 // DESTROY
 // DELETE /task/5a7db6c74d55bc51bdf39793
-router.delete('/tasks/:id', requireToken, breakOldChains, (req, res) => {
+router.delete('/tasks/:id', (req, res) => {
   Task.findById(req.params.id)
     .then(handle404)
     .then(task => {

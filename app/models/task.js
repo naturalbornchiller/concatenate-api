@@ -1,3 +1,4 @@
+const moment = require('moment')
 const mongoose = require('mongoose')
 const { chainSchema } = require('./chain')
 
@@ -57,7 +58,7 @@ taskSchema.virtual('concatAvailable').get(function () {
     const latestChainIdx = this.chains.length - 1
 
     // whether the latest chain is NOT broken AND it's been over 24hrs since the last concat
-    return !this.chains[latestChainIdx].dateBroken && (new Date() - this.chains[latestChainIdx].lastConcat > 86400000)
+    return !this.chains[latestChainIdx].dateBroken && moment(this.chains[latestChainIdx].lastConcat).diff(moment(), 'days') === 1
   } else {
     // otherwise concat is NOT available
     return false
