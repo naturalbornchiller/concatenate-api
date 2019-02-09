@@ -58,8 +58,8 @@ taskSchema.virtual('concatAvailable').get(function () {
     const latestChainIdx = this.chains.length - 1
 
     // today and lastConcat with floored hours
-    const today = moment().hours(0)
-    const lastConcat = moment(this.chains[latestChainIdx].lastConcat).hours(0)
+    const today = moment().hours(0).minutes(0).seconds(0).milliseconds(0)
+    const lastConcat = moment(this.chains[latestChainIdx].lastConcat).hours(0).minutes(0).seconds(0).milliseconds(0)
 
     // return boolean: has it's been 1day since lastConcat?
     return today.diff(lastConcat, 'days') === 1
@@ -79,13 +79,13 @@ taskSchema.virtual('hoursToBreak').get(function () {
     // last concatenation
     const lastConcat = moment(this.chains[latestChainIdx].lastConcat)
     // 2 days after last concatenation
-    const lastConcatPlusTwoDays = lastConcat.add(2, 'days').hours(0)
+    const lastConcatPlusTwoDays = lastConcat.add(2, 'days').hours(0).minutes(0).seconds(0).milliseconds(0)
     // today
-    const today = moment().hours(0)
+    const today = moment().hours(0).minutes(0).seconds(0).milliseconds(0)
     
     // difference, in hours, between today
     // and 2 days from last concatenation
-    return today.diff(lastConcatPlusTwoDays, 'hours')
+    return lastConcatPlusTwoDays.diff(today, 'hours')
   } else {
     // otherwise send false
     return false

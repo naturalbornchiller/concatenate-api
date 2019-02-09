@@ -34,8 +34,6 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-//TODO convert to momentJS logic 
-
 // this middleware breaks chains that haven't been updated
 const breakOldChains = (req, res, next) => {
 
@@ -51,18 +49,19 @@ const breakOldChains = (req, res, next) => {
         // index of last chain in task.chains
         const latestChainIdx = task.chains.length - 1
 
-        // today and last concatenation, floored
-        const today = moment().hours(0)
-        const lastConcat = moment(task.chains[latestChainIdx].lastConcat).hours(0)
+        // date of today and last concatenation, with zeroed time
+        const today = moment()
+          .hours(0).minutes(0).seconds(0).milliseconds(0)
+        const lastConcat = moment(task.chains[latestChainIdx].lastConcat)
+          .hours(0).minutes(0).seconds(0).milliseconds(0)
 
-        // if they haven't concatenated in over 2 days
-        if (today.diff(lastConcat, 'days') > 2) {
-          // get the day after last concat
-          const newDay = task.chains[latestChainIdx].lastConcat
-          newDay.setDate(task.chains[latestChainIdx].lastConcat.getDate() + 1)
+        // if they haven't concated in over a day
+        if (today.diff(lastConcat, 'days') > 1) {
+          // get the last concat
+          const lastDay = task.chains[latestChainIdx].lastConcat
 
           // break the chain
-          task.chains[latestChainIdx].dateBroken = newDay
+          task.chains[latestChainIdx].dateBroken = lastDay
 
           // save the modified task
           return task.save()
