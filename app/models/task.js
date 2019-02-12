@@ -21,14 +21,24 @@ const taskSchema = new mongoose.Schema(
 )
 
 // get index of longest chain for this task
-taskSchema.virtual('longestChainIndex').get(function () {
+taskSchema.virtual('longestChain').get(function () {
   // stores the length of the biggest chain in the array
   const maxLength = Math.max.apply(null, this.chains.map(c => c.length))
 
-  // returns the index of that length
+  // store the index of that length
   // or -1 if the chains array is empty
   // note: does not handle duplicate maxLengths
-  return this.chains.findIndex(c => c.length === maxLength)
+  const chainIdx = this.chains.findIndex(c => c.length === maxLength)
+
+  // if the task has no chains return false
+  if (chainIdx === -1) return false
+
+  // store start/end of longest chain
+  const start = moment(this.chains[chainIdx].dateStarted)
+  const end = moment(this.chains[chainIdx].dateBroken || this.chains[chainIdx].lastConcat)
+
+  // return formatted string
+  return start.format('MM/DD/YY') + ' - ' + end.format('MM/DD/YY')
 })
 
 // get all days inwhich task was completed
